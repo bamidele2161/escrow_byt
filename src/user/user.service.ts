@@ -4,16 +4,17 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { error } from 'console';
 import { Model } from 'mongoose';
 import { CreateWaitListDto, CreateWaitListResponseDto } from 'src/dto/userDto';
 import { UserWaitList } from 'src/schema/user.schema';
+import { EmailService } from 'src/service/mailer.service';
 
 @Injectable()
 export class UserWaitListService {
   constructor(
     @InjectModel(UserWaitList.name)
     private readonly userWaitList: Model<UserWaitList>,
+    private readonly emailService: EmailService,
   ) {}
 
   async createWaitlist(
@@ -27,6 +28,23 @@ export class UserWaitListService {
         throw new BadRequestException('User with this email already exists');
       }
       const user = await this.userWaitList.create(createWaitListDto);
+
+      if (!user) {
+        throw new BadRequestException('Error occured while adding user');
+      }
+      //send user email
+      const subject = "You've been added to waitlist successfully.";
+      const payload = {
+        name: user?.fullName?.slice(0, user?.fullName?.indexOf(' ')),
+      };
+      const recipientEmail = user.email;
+
+      await this.emailService.sendMail(
+        subject,
+        payload,
+        recipientEmail,
+        './waitlist',
+      );
 
       const response: CreateWaitListResponseDto = {
         message: "You've successfully been added to our waitlist. Cheers!",
@@ -43,8 +61,7 @@ export class UserWaitListService {
 
       return response;
     } catch (error) {
-      console.log(error);
-      throw new InternalServerErrorException('Error creating user');
+      return error.response;
     }
   }
 }
