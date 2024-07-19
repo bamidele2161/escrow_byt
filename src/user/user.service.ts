@@ -1,11 +1,6 @@
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { SendMailDto } from 'src/dto/mailerDto';
 import { CreateWaitListDto, CreateWaitListResponseDto } from 'src/dto/userDto';
 import { UserWaitList } from 'src/schema/user.schema';
 import { EmailService } from 'src/service/mailer.service';

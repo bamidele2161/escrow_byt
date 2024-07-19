@@ -1,6 +1,11 @@
+import { IsEmail } from 'class-validator';
+
 export class CreateWaitListDto {
   fullName: string;
+
+  @IsEmail()
   email: string;
+
   phone: string;
 }
 
