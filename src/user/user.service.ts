@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { SendMailDto } from 'src/dto/mailerDto';
 import { CreateWaitListDto, CreateWaitListResponseDto } from 'src/dto/userDto';
 import { UserWaitList } from 'src/schema/user.schema';
 import { EmailService } from 'src/service/mailer.service';
@@ -35,15 +36,15 @@ export class UserWaitListService {
       //send user email
       const subject = "You've been added to waitlist successfully.";
       const payload = {
-        name: user?.fullName?.slice(0, user?.fullName?.indexOf(' ')),
+        name: user?.fullName?.split(' ')[0],
       };
       const recipientEmail = user.email;
 
-      await this.emailService.sendMail(
-        subject,
-        payload,
+      await this.emailService.sendUserWaitlist(
         recipientEmail,
-        './waitlist',
+        subject,
+        'waitlist',
+        payload,
       );
 
       const response: CreateWaitListResponseDto = {
@@ -58,7 +59,7 @@ export class UserWaitListService {
         },
         statusCode: 200,
       };
-
+      console.log(response);
       return response;
     } catch (error) {
       return error.response;

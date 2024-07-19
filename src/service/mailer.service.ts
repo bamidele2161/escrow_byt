@@ -1,28 +1,24 @@
 import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
+import * as dotenv from 'dotenv';
 
+dotenv.config();
 @Injectable()
 export class EmailService {
-  constructor(private readonly mailService: MailerService) {}
+  constructor(private readonly mailerService: MailerService) {}
 
-  async sendMail(
-    subject: string,
-    payload: any,
+  sendUserWaitlist(
     recipientEmail: string,
-    template: any,
-  ) {
-    try {
-      const result = await this.mailService.sendMail({
-        to: recipientEmail,
-        subject: subject,
-        template: template,
-        context: payload,
-      });
-
-      console.log(result);
-
-      const verify = await this.mailService.verifyAllTransporters();
-      console.log(verify);
-    } catch (error) {}
+    subject: string,
+    template: string,
+    payload: any,
+  ): void {
+    this.mailerService.sendMail({
+      to: recipientEmail,
+      from: process.env.MAIL_SENDER,
+      subject: subject,
+      template: template,
+      context: payload,
+    });
   }
 }
