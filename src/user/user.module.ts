@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
-import { UserWaitListService } from './user.service';
-import { UserWaitListController } from './user.controller';
+import { UserController } from './user.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { JwtModule } from '@nestjs/jwt';
 import {
@@ -8,21 +7,26 @@ import {
   UserWaitListSchema,
 } from 'src/schema/userWaitList.schema';
 import { EmailModule } from 'src/service/mailer.module';
+import { UserService } from './user.service';
+import { User, UserSchema } from 'src/schema/user.schema';
+import { HelperModule } from 'src/utils/helper.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: UserWaitList.name, schema: UserWaitListSchema },
+      { name: User.name, schema: UserSchema },
     ]),
     EmailModule,
+    HelperModule,
     JwtModule.register({
       global: true,
       secret: process.env.TOKEN_USER_SECRET,
       signOptions: { expiresIn: '30m' },
     }),
   ],
-  providers: [UserWaitListService],
-  controllers: [UserWaitListController],
-  exports: [UserWaitListService],
+  providers: [UserService],
+  controllers: [UserController],
+  exports: [UserService],
 })
 export class UserModule {}

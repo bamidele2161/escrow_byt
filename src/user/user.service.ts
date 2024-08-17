@@ -19,12 +19,12 @@ import { EmailService } from 'src/service/mailer.service';
 import { HelperService } from 'src/utils/helper.service';
 
 @Injectable()
-export class UserWaitListService {
+export class UserService {
   constructor(
     @InjectModel(UserWaitList.name)
-    private readonly userWaitList: Model<UserWaitList>,
+    private readonly userWaitListModel: Model<UserWaitList>,
     private readonly emailService: EmailService,
-    private readonly user: Model<User>,
+    @InjectModel(User.name) private readonly userModel: Model<User>,
     private readonly helperService: HelperService,
   ) {}
 
@@ -32,14 +32,13 @@ export class UserWaitListService {
     createWaitListDto: CreateWaitListDto,
   ): Promise<CreateWaitListResponseDto> {
     try {
-      const existingUser = await this.userWaitList
+      const existingUser = await this.userWaitListModel
         .findOne({ email: createWaitListDto.email })
         .exec();
       if (existingUser) {
         throw new BadRequestException('User with this email already exists');
       }
-      const user = await this.userWaitList.create(createWaitListDto);
-
+      const user = await this.userWaitListModel.create(createWaitListDto);
       if (!user) {
         throw new BadRequestException('Error occured while adding user');
       }
@@ -69,7 +68,7 @@ export class UserWaitListService {
         },
         statusCode: 200,
       };
-      console.log(response);
+
       return response;
     } catch (error) {
       return error.response;
@@ -81,7 +80,7 @@ export class UserWaitListService {
     createUserDto: CreateUserDto,
   ): Promise<CreateWaitListResponseDto> {
     try {
-      const existingUser = await this.user
+      const existingUser = await this.userModel
         .findOne({ email: createUserDto.email })
         .exec();
       if (existingUser) {
@@ -99,15 +98,24 @@ export class UserWaitListService {
         password: cryptedPassword,
       };
 
-      const user = await this.userWaitList.create(requireData);
+      const user = await this.userModel.create(requireData);
 
       if (!user) {
         throw new BadRequestException('Error occured while adding user');
       }
+
+      const jwtPayload = { sub: user._id, email: user.email };
+
+      const emailVerificationToken =
+        await this.helperService.generateToken(jwtPayload);
+
+      const url = `${process.env.BASE_URL}/user/activate/${emailVerificationToken}`;
+
       //send user email
       const subject = 'Your account has been successfully.';
       const payload = {
         name: user?.fullName?.split(' ')[0],
+        url,
       };
       const recipientEmail = user.email;
 
@@ -130,7 +138,7 @@ export class UserWaitListService {
         },
         statusCode: 200,
       };
-      console.log(response);
+
       return response;
     } catch (error) {
       return error.response;
@@ -142,7 +150,7 @@ export class UserWaitListService {
     loginUserDto: LoginUserDto,
   ): Promise<CreateWaitListResponseDto> {
     try {
-      const existingUser = await this.user
+      const existingUser = await this.userModel
         .findOne({ email: loginUserDto.email })
         .exec();
       if (!existingUser) {
@@ -175,7 +183,7 @@ export class UserWaitListService {
         },
         statusCode: 200,
       };
-      console.log(response);
+
       return response;
     } catch (error) {
       return error.response;
@@ -190,7 +198,9 @@ export class UserWaitListService {
         userSecret as string,
       );
 
-      const checkUser = await this.user.findOne({ email: user.email }).exec();
+      const checkUser = await this.userModel
+        .findOne({ email: user.email })
+        .exec();
       if (!checkUser) {
         throw new NotFoundException('User with this email does not exists');
       }
@@ -199,7 +209,7 @@ export class UserWaitListService {
         throw new BadRequestException('This account is already verified.');
       }
 
-      const updateUser = await this.user.findByIdAndUpdate(
+      const updateUser = await this.userModel.findByIdAndUpdate(
         { id: checkUser.id },
         { isVerified: true },
       );
@@ -220,7 +230,7 @@ export class UserWaitListService {
 
   async forgotPassword(email: string): Promise<VerificationDto> {
     try {
-      const checkUser = await this.user.findOne({ email: email }).exec();
+      const checkUser = await this.userModel.findOne({ email: email }).exec();
       if (!checkUser) {
         throw new NotFoundException('User with this email does not exists');
       }
@@ -229,7 +239,7 @@ export class UserWaitListService {
 
       const userToken = await this.helperService.generateToken(jwtPayload);
 
-      const updatedUser = await this.user.findByIdAndUpdate(
+      const updatedUser = await this.userModel.findByIdAndUpdate(
         { id: checkUser._id },
         { resetToken: userToken },
       );
@@ -264,7 +274,7 @@ export class UserWaitListService {
     resetPasswordDto: ResetPasswordDto,
   ): Promise<VerificationDto> {
     try {
-      const checkUser = await this.user
+      const checkUser = await this.userModel
         .findOne({ resetToken: resetPasswordDto?.token })
         .exec();
       if (!checkUser) {
@@ -276,7 +286,7 @@ export class UserWaitListService {
         12,
       );
 
-      const updateUser = await this.user.findOneAndUpdate(
+      const updateUser = await this.userModel.findOneAndUpdate(
         { id: checkUser._id },
         { resetToken: null, password: cryptedPassword },
       );

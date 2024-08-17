@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
-import { UserWaitListService } from './user.service';
+import { UserService } from './user.service';
 import {
   CreateUserDto,
   CreateWaitListDto,
@@ -11,43 +11,43 @@ import {
 import { HelperService } from 'src/utils/helper.service';
 
 @Controller('user')
-export class UserWaitListController {
-  constructor(private readonly userwaitlistservice: UserWaitListService) {}
+export class UserController {
+  constructor(private readonly userService: UserService) {}
 
   @Post('waitlist')
   async createUserWaitList(
     @Body() createWaitListDto: CreateWaitListDto,
   ): Promise<CreateWaitListResponseDto> {
-    return await this.userwaitlistservice.createWaitlist(createWaitListDto);
+    return await this.userService.createWaitlist(createWaitListDto);
   }
 
   @Post('create')
   async createUser(
     @Body() createUserDto: CreateUserDto,
   ): Promise<CreateWaitListResponseDto> {
-    return await this.userwaitlistservice.createUser(createUserDto);
+    return await this.userService.createUser(createUserDto);
   }
 
   @Post('login')
   async loginUser(
     @Body() loginDto: LoginUserDto,
   ): Promise<CreateWaitListResponseDto> {
-    return await this.userwaitlistservice.loginUser(loginDto);
+    return await this.userService.loginUser(loginDto);
   }
 
   @Post('verify')
   async verifyAccount(@Body() verifyDto: string): Promise<VerificationDto> {
-    return await this.userwaitlistservice.verifyAccount(verifyDto);
+    return await this.userService.verifyAccount(verifyDto);
   }
   @Post('forgot-pasword')
   async forgotPassword(@Body() email: string): Promise<VerificationDto> {
-    return await this.userwaitlistservice.forgotPassword(email);
+    return await this.userService.forgotPassword(email);
   }
 
   @Post('reset-password')
   async resetPassword(
     @Body() resetPasswordDto: ResetPasswordDto,
   ): Promise<VerificationDto> {
-    return await this.userwaitlistservice.resetPassword(resetPasswordDto);
+    return await this.userService.resetPassword(resetPasswordDto);
   }
 }
