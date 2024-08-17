@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
 @Schema({ timestamps: true })
-export class User {
+export class UserWaitList {
   @Prop()
   fullName: string;
 
@@ -12,12 +12,6 @@ export class User {
   @Prop({ required: true })
   phone: string;
 
-  @Prop({ required: true })
-  password: string;
-
-  isVerified: boolean;
-
-  resetToken: string;
   @Prop()
   createdAt: Date;
 
@@ -25,4 +19,4 @@ export class User {
   updatedAt: Date;
 }
 
-export const UserSchema = SchemaFactory.createForClass(User);
+export const UserWaitListSchema = SchemaFactory.createForClass(UserWaitList);

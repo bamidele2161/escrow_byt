@@ -7,7 +7,7 @@ dotenv.config();
 export class EmailService {
   constructor(private readonly mailerService: MailerService) {}
 
-  sendUserWaitlist(
+  sendMail(
     recipientEmail: string,
     subject: string,
     template: string,
