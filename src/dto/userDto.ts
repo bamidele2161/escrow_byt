@@ -42,6 +42,10 @@ export class VerificationDto {
   statusCode: number;
 }
 
+export class EmailDto {
+  email: string;
+}
+
 export class ResetPasswordDto {
   token: string;
   password: string;

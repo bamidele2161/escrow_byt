@@ -9,7 +9,6 @@ import {
   CreateUserDto,
   CreateWaitListDto,
   CreateWaitListResponseDto,
-  EmailDto,
   LoginUserDto,
   ResetPasswordDto,
   VerificationDto,
@@ -118,13 +117,12 @@ export class UserService {
         name: user?.fullName?.split(' ')[0],
         url,
       };
-
       const recipientEmail = user.email;
 
       await this.emailService.sendMail(
         recipientEmail,
         subject,
-        'welcomeUser',
+        'waitlist',
         payload,
       );
 
@@ -211,8 +209,8 @@ export class UserService {
         throw new BadRequestException('This account is already verified.');
       }
 
-      const updateUser = await this.userModel.findOneAndUpdate(
-        { email: checkUser.email },
+      const updateUser = await this.userModel.findByIdAndUpdate(
+        { id: checkUser.id },
         { isVerified: true },
       );
 
@@ -230,11 +228,9 @@ export class UserService {
     }
   }
 
-  async forgotPassword(emailDto: EmailDto): Promise<VerificationDto> {
+  async forgotPassword(email: string): Promise<VerificationDto> {
     try {
-      const checkUser = await this.userModel
-        .findOne({ email: emailDto.email })
-        .exec();
+      const checkUser = await this.userModel.findOne({ email: email }).exec();
       if (!checkUser) {
         throw new NotFoundException('User with this email does not exists');
       }
@@ -243,8 +239,8 @@ export class UserService {
 
       const userToken = await this.helperService.generateToken(jwtPayload);
 
-      const updatedUser = await this.userModel.findOneAndUpdate(
-        { email: checkUser.email },
+      const updatedUser = await this.userModel.findByIdAndUpdate(
+        { id: checkUser._id },
         { resetToken: userToken },
       );
 
@@ -291,7 +287,7 @@ export class UserService {
       );
 
       const updateUser = await this.userModel.findOneAndUpdate(
-        { id: checkUser.email },
+        { id: checkUser._id },
         { resetToken: null, password: cryptedPassword },
       );
 

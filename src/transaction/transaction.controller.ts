@@ -1,10 +1,9 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
-import { UserService } from './user.service';
+import { UserService } from './transaction.service';
 import {
   CreateUserDto,
   CreateWaitListDto,
   CreateWaitListResponseDto,
-  EmailDto,
   LoginUserDto,
   ResetPasswordDto,
   VerificationDto,
@@ -40,9 +39,9 @@ export class UserController {
   async verifyAccount(@Body() verifyDto: string): Promise<VerificationDto> {
     return await this.userService.verifyAccount(verifyDto);
   }
-  @Post('forgot-password')
-  async forgotPassword(@Body() emailDto: EmailDto): Promise<VerificationDto> {
-    return await this.userService.forgotPassword(emailDto);
+  @Post('forgot-pasword')
+  async forgotPassword(@Body() email: string): Promise<VerificationDto> {
+    return await this.userService.forgotPassword(email);
   }
 
   @Post('reset-password')
